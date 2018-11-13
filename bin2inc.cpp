@@ -114,12 +114,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			for (int idx=0; idx<cnt; idx++) {
 				if (isprint(buf[idx])) {
 					fprintf(fout, "%c", buf[idx]);
-                    if ((buf[idx]=='\\')&&(idx+1==cnt)) fputchar(' ');  // don't end a line with a backslash - bad for C!
 				} else {
 					fprintf(fout, ".");
 				}
 			}
-			fprintf(fout, " \n");
+			fprintf(fout, " //\n");
 			nTotal+=cnt;
 			nPos+=cnt;
 		} else {
