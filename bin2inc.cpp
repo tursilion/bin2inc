@@ -19,6 +19,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	char szSize[128]="#define %s %d\n";					// name then size
 	int  nWidth = 16;									// bytes per line
 	bool lastComma=true;								// comma at end of line?
+	bool emitIfdef = true;
 
 	printf("bin2inc by Tursi - http://harmlesslion.com\n");
 
@@ -56,6 +57,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			strcpy(szSize, "%s EQU %d\n");		// name then size
 			nWidth = 8;							// bytes per line
 			lastComma=false;					// comma at end of line?
+			emitIfdef = false;
 		} else if (stricmp(argv[4], "Z80") == 0) {
 			strcpy(szHeader, "%s:\n");			// top of list
 			strcpy(szPreface, ".db");			// per line
@@ -66,6 +68,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			strcpy(szSize, "%s = %d\n");		// name then size
 			nWidth = 8;							// bytes per line
 			lastComma=false;					// comma at end of line?
+			emitIfdef = false;
 		} else {
 			printf("Unrecognized machine '%s'\n", argv[4]);
 			return 10;
@@ -80,6 +83,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	strftime(date,128,"%b %d, %Y",&tim);
 
 	fprintf(fout, "%s\n%s Data file %s - %s\n%s\n\n", szComment, szComment, argv[1],date, szComment);
+
+	if (emitIfdef) fprintf(fout, "#ifndef BIN2INC_HEADER_ONLY\n");
+
 	fprintf(fout, szHeader, argv[3]);
 
 	int nPos = 0;
@@ -128,11 +134,19 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	fprintf(fout, szFooter);
 
+	if (emitIfdef) {
+		fprintf(fout, "#else\nextern const unsigned char %s[];\n", argv[3]);
+	}
+
 	_snprintf(szName, 256, "SIZE_OF_%s", argv[3]);
 	szName[255]='\0';
 	_strupr(szName);
 	fprintf(fout, "\n%s Size of data in above array\n", szComment);
 	fprintf(fout, szSize, szName, nTotal);
+
+	if (emitIfdef) {
+		fprintf(fout, "#endif\n");
+	}
 
 	fclose(fin);
 	fclose(fout);
